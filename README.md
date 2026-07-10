@@ -367,10 +367,26 @@ podman run --rm -p 127.0.0.1:8000:8000 \
 
 Linuxサーバー上でsystemd管理サービスとして常時起動する手順は[deploy/README.md](deploy/README.md)を参照してください（Podman Quadletを使用）。
 
+## 個人情報の取り扱いについて
+
+このリポジトリ（フォーク含む）は **public** です。実際の氏名・住所・連絡先・職務経歴等の
+個人情報は、`data.yaml`・`cv.md`のような形であってもリポジトリに含めないでください。
+
+* 実データは常にリポジトリ外（例: Obsidianや`~/private/`等）に置き、`-i`オプションで
+  外部パスを指定して生成する
+* `cv.md` / `cv_*.md` / `*.local.yaml` / `private/` / `personal/` は`.gitignore`で除外済み
+* コミット前チェック（`scripts/check_no_pii.py`）を導入すると、実データらしきファイル名や
+  未許可のメールアドレスの混入をコミット前に検知できます:
+
+  ```sh
+  uvx pre-commit install
+  ```
+
+* GitHub Actions（`.github/workflows/check-no-pii.yml`）でも同じチェックをpush/PR時に自動実行します（ローカルのフック導入を忘れていても検知可能）
+
 ## 今後の改善案
 
 * テスト基盤の整備（現状 Ruby 側・Python 側ともに自動テストなし）
-* CI（GitHub Actions）の導入
 * `make_cv.rb`と`txt2yaml.rb`に重複する`size`メソッドの共通化
 
 ## 参考

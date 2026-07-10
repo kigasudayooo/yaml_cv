@@ -1,0 +1,12 @@
+name: 個人情報混入チェック
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check-no-pii:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check_no_pii.py tree

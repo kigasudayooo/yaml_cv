@@ -14,3 +14,14 @@ pyexport/.ruff_cache/
 
 # Deploy secrets
 deploy/web.env
+
+# 実データ（個人情報）が入りうるファイル。詳細は scripts/check_no_pii.py を参照。
+# sample/*.pdf のみ既存コミット済みのため *.pdf ルールで除外済み。
+cv.md
+cv_*.md
+data.local.yaml
+data.local.yml
+*.local.yaml
+*.local.yml
+private/
+personal/

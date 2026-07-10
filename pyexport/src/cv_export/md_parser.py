@@ -215,7 +215,19 @@ def parse_cv_markdown(path: Path) -> CVDocument:
     Returns:
         セクションごとに構造化された職務経歴データ。
     """
-    raw_lines = path.read_text(encoding="utf-8").splitlines()
+    return parse_cv_markdown_text(path.read_text(encoding="utf-8"))
+
+
+def parse_cv_markdown_text(text: str) -> CVDocument:
+    """cv.md 相当の Markdown 文字列を構造化された CVDocument に変換する。
+
+    Args:
+        text: cv.md の内容（Markdown テキスト）。
+
+    Returns:
+        セクションごとに構造化された職務経歴データ。
+    """
+    raw_lines = text.splitlines()
 
     section_blocks: list[tuple[str, list[str]]] = []
     current_title: str | None = None

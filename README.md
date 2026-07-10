@@ -363,7 +363,12 @@ podman run --rm -p 127.0.0.1:8000:8000 \
   yaml_cv:latest
 ```
 
-`http://127.0.0.1:8000/` にアクセスするとアップロードフォームが表示されます。`WEBAPP_BASIC_AUTH_USER`/`WEBAPP_BASIC_AUTH_PASSWORD`を設定しない場合は認証なしで動作します（ローカル開発用途）。
+`http://127.0.0.1:8000/` にアクセスするとトップページが表示されます。`WEBAPP_BASIC_AUTH_USER`/`WEBAPP_BASIC_AUTH_PASSWORD`を設定しない場合は認証なしで動作します（ローカル開発用途）。
+
+トップページには2通りの作成方法があります。
+
+- **フォームから作成する（おすすめ）**: `/rirekisho`・`/shokumu` で、ブラウザ上の入力フォームに項目を1つずつ入力し、そのままPDF/Excel/Wordを生成できます。入力内容はブラウザのlocalStorageにのみ自動保存され、サーバには生成時以外送信されません。`data.yaml`/`cv.md`の読み込み・書き出しも可能です。
+- **ファイルをアップロードして作成する（上級者向け）**: 手元で用意した`data.yaml`/`cv.md`をそのままアップロードして生成します（従来からの方式）。
 
 Linuxサーバー上でsystemd管理サービスとして常時起動する手順は[deploy/README.md](deploy/README.md)を参照してください（Podman Quadletを使用）。
 

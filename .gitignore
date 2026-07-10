@@ -3,3 +3,14 @@
 # Bundler
 vendor/bundle/
 .bundle/
+
+# Python (pyexport)
+pyexport/.venv/
+pyexport/__pycache__/
+pyexport/**/__pycache__/
+pyexport/.ruff_cache/
+*.docx
+*.xlsx
+
+# Deploy secrets
+deploy/web.env

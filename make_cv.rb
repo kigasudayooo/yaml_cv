@@ -170,15 +170,6 @@ class CVMaker
     end
   end
 
-  def puts_history(year_x, month_x, value_x, h)
-    year = h.fetch("year", "").to_s
-    month = h.fetch("month", "").to_s
-    put_string(year_x, y, year, font_size, font_face)
-    x = month_x - (month.size - 1) * font_size * 0.3
-    put_string(x, y, month, font_size, font_face)
-    put_string(value_x, y, h["value"].to_s, font_size, font_face)
-  end
-
   # 学歴・職歴
   def education_experience(h)
     y = size(h["y"])

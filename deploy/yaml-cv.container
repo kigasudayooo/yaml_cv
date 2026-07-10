@@ -1,0 +1,37 @@
+# Podman Quadlet ユニット。Linuxサーバー上でsystemd管理サービスとして起動するための定義。
+#
+# 配置先（rootless運用の場合）:
+#   ~/.config/containers/systemd/yaml-cv.container
+# 配置先（rootful/システム全体運用の場合）:
+#   /etc/containers/systemd/yaml-cv.container
+#
+# 配置後:
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now yaml-cv.service
+# （rootfulの場合は --user を外す）
+#
+# 詳細は deploy/README.md を参照。
+
+[Unit]
+Description=yaml_cv web service (rirekisho/shokumu generator)
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=localhost/yaml_cv:latest
+ContainerName=yaml_cv
+# 外部公開はリバースプロキシ(nginx/Caddy等)経由を前提とし、ループバックのみ公開する
+PublishPort=127.0.0.1:8000:8000
+EnvironmentFile=%h/.config/yaml_cv/web.env
+HealthCmd=/app/pyexport/.venv/bin/python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"
+HealthInterval=30s
+HealthTimeout=5s
+HealthStartPeriod=10s
+HealthRetries=3
+
+[Service]
+Restart=always
+TimeoutStartSec=60
+
+[Install]
+WantedBy=default.target

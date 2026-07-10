@@ -340,6 +340,39 @@ string,110mm,245mm,$date,font_size=9
 
 が出力されます。同様にYAMLで書かれたスタイルファイルは`yaml2txt.rb`でテキスト形式に変換できます。
 
+## Word/Excel出力・職務経歴書作成（Python）
+
+履歴書のWord/Excel出力、および職務経歴書（Markdown入力）のWord出力を行うPythonツールを`pyexport/`以下に用意しています。詳細は[pyexport/README.md](pyexport/README.md)を参照してください。
+
+```sh
+cd pyexport
+uv sync
+uv run cv-export shokumu-word -i /path/to/cv.md -o shokumu.docx
+uv run cv-export rirekisho-excel -i ../data.yaml -o rirekisho.xlsx
+uv run cv-export rirekisho-word -i ../data.yaml -o rirekisho.docx
+```
+
+## Podmanコンテナ・Webサーバー
+
+Ruby(Bundler)とPython(uv)の実行環境をまとめてPodmanコンテナ化し、ブラウザからファイルをアップロードして履歴書/職務経歴書を生成できるWebサーバー（FastAPI）も用意しています。
+
+```sh
+podman build -t yaml_cv:latest -f Containerfile .
+podman run --rm -p 127.0.0.1:8000:8000 \
+  -e WEBAPP_BASIC_AUTH_USER=xxx -e WEBAPP_BASIC_AUTH_PASSWORD=yyy \
+  yaml_cv:latest
+```
+
+`http://127.0.0.1:8000/` にアクセスするとアップロードフォームが表示されます。`WEBAPP_BASIC_AUTH_USER`/`WEBAPP_BASIC_AUTH_PASSWORD`を設定しない場合は認証なしで動作します（ローカル開発用途）。
+
+Linuxサーバー上でsystemd管理サービスとして常時起動する手順は[deploy/README.md](deploy/README.md)を参照してください（Podman Quadletを使用）。
+
+## 今後の改善案
+
+* テスト基盤の整備（現状 Ruby 側・Python 側ともに自動テストなし）
+* CI（GitHub Actions）の導入
+* `make_cv.rb`と`txt2yaml.rb`に重複する`size`メソッドの共通化
+
 ## 参考
 
 このスクリプトは、[PruneMazui](https://github.com/PruneMazui)さんの[resume-maker](https://github.com/PruneMazui/resume-maker)に影響されて開発したものです。

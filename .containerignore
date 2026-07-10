@@ -1,0 +1,10 @@
+.git/
+vendor/bundle/
+.bundle/
+pyexport/.venv/
+pyexport/.ruff_cache/
+pyexport/**/__pycache__/
+sample/
+*.pdf
+*.docx
+*.xlsx

@@ -33,6 +33,9 @@ BLOCKED_FILENAME_PATTERNS = [
 ]
 # sample/ 配下の既存PDFサンプルのみ例外的に許可
 ALLOWED_PDF_PREFIX = "sample/"
+# pyexport/src/cv_export/templates/ 配下は個人情報を含まない配布用テンプレート
+# (docx/xlsx) を意図的に同梱しているため許可する。
+ALLOWED_OFFICE_TEMPLATE_PREFIX = "pyexport/src/cv_export/templates/"
 
 # メールアドレスとして許可するパターン（プレースホルダ・noreplyアドレス）
 ALLOWED_EMAIL_PATTERNS = [
@@ -70,7 +73,7 @@ def _is_allowed_email(email: str) -> bool:
 def _check_filenames(files: list[str]) -> list[str]:
     errors: list[str] = []
     for f in files:
-        if f.startswith(ALLOWED_PDF_PREFIX):
+        if f.startswith(ALLOWED_PDF_PREFIX) or f.startswith(ALLOWED_OFFICE_TEMPLATE_PREFIX):
             continue
         for pattern in BLOCKED_FILENAME_PATTERNS:
             if pattern.search(f):

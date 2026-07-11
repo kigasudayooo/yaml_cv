@@ -1,0 +1,122 @@
+body {
+  font-family: sans-serif;
+  max-width: 860px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  line-height: 1.5;
+}
+
+section {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+h1 {
+  font-size: 1.3rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin-top: 0;
+}
+
+h3 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+label {
+  display: block;
+  margin-top: 0.75rem;
+  font-weight: bold;
+}
+
+label > input,
+label > select,
+label > textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font-weight: normal;
+  margin-top: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 1rem;
+}
+
+textarea {
+  min-height: 4rem;
+  font-family: inherit;
+}
+
+fieldset {
+  border: 1px dashed #999;
+  border-radius: 6px;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.row .narrow {
+  flex: 0 0 6rem;
+}
+
+button {
+  cursor: pointer;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: 1px solid #888;
+  background: #f4f4f4;
+}
+
+button.primary {
+  background: #2b6cb0;
+  color: #fff;
+  border-color: #2b6cb0;
+}
+
+button.small {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+button.danger {
+  background: #fff5f5;
+  border-color: #c53030;
+  color: #c53030;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.status {
+  font-size: 0.85rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+nav a {
+  margin-right: 1rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: normal;
+}

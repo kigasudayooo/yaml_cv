@@ -57,19 +57,41 @@ uv run cv-export rirekisho-excel -i ../data.yaml -o rirekisho.xlsx
 uv run cv-export rirekisho-word  -i ../data.yaml -o rirekisho.docx
 ```
 
+Excel/Word 出力は `cv_export/templates/rirekisho_template.{xlsx,docx}`（B5サイズの
+標準的な履歴書フォーマット）に値を差し込む方式です。テンプレート自体の罫線・
+フォント・列幅は変更せず、対応するセル/表の行に値を書き込みます。
+このテンプレートには「通勤時間・扶養家族・配偶者・配偶者の扶養義務」欄が無いため、
+`data.yaml` にこれらを記載していても Excel/Word には反映されません（PDF出力
+[`style.txt`] 側には引き続き反映されます）。「趣味・特技」も専用欄が無いため、
+志望動機欄に追記する形で出力されます。
+
 ### Webサーバー（ローカル起動）
 
-CLIとは別に、ブラウザからアップロードして生成できる簡易Webサーバーもあります
-（Ruby側の`bundle install`が完了している前提。PDF生成はサブプロセスで`bundle exec ruby ../make_cv.rb`を呼び出します）。
+CLIとは別に、ブラウザから使える簡易Webサーバーもあります
+（Ruby側の`bundle install`が完了している前提。PDF生成はサブプロセスで`make_cv.rb`を呼び出します）。
 
 ```sh
-CV_EXPORT_REPO_ROOT=.. \
+CV_EXPORT_REPO_ROOT=$(cd .. && pwd) \
 WEBAPP_BASIC_AUTH_USER=xxx WEBAPP_BASIC_AUTH_PASSWORD=yyy \
 uv run uvicorn cv_export.web:app --app-dir src --host 127.0.0.1 --port 8000
 ```
 
+`CV_EXPORT_REPO_ROOT`は**絶対パス**で指定すること（相対パスだと `make_cv.rb` の起動時に解決に失敗する）。
 `WEBAPP_BASIC_AUTH_USER`/`WEBAPP_BASIC_AUTH_PASSWORD`を省略すると認証なしで起動します（ローカル動作確認用）。
 Podmanコンテナ化・本番デプロイの手順はリポジトリルートの[README.md](../README.md#podmanコンテナwebサーバー)および[deploy/README.md](../deploy/README.md)を参照してください。
+
+#### ブラウザのフォームから入力して生成する（推奨）
+
+`http://127.0.0.1:8000/` を開くと、フォーム入力で履歴書・職務経歴書を作成できるページへのリンクがあります。
+
+- `/rirekisho`: 実際の履歴書用紙に近いレイアウトの画面に、氏名・住所・学歴・職歴・資格などを直接入力し、PDF / Excel / Word のいずれかを生成してダウンロードできます。
+- `/shokumu`: 職務経歴書（職務概要・学歴・スキル・会社ごとの職務経歴とプロジェクト）を入力し、Word を生成してダウンロードできます。
+
+入力内容は**ブラウザの localStorage にのみ自動保存**され、サーバには生成時以外送信・保存されません。
+また、既存の `data.yaml` / `cv.md` を「読み込む」ボタンでフォームに反映したり、「書き出す」ボタンで
+`data.yaml` / `cv.md` としてダウンロードすることもできます（CLI との併用や下書きの持ち運びに利用可能）。
+
+これまでどおり、手元で用意したファイルをアップロードして生成する方式（上記2つの `POST /generate/*` エンドポイント）も引き続き利用できます。
 
 ## フォントについて
 

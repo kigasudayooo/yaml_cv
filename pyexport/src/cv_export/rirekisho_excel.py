@@ -52,8 +52,16 @@ def build_rirekisho_workbook(data: dict[str, Any]) -> Workbook:
     ws.title = "履歴書"
     ws.sheet_view.showGridLines = False
 
-    for col, width in zip("ABCDEFGHIJ", [4, 10, 10, 10, 10, 10, 10, 10, 10, 12], strict=True):
+    # A-F列のみ使用。ラベル列は狭め、値列(結合セルを含む)は住所等が
+    # 折り返さずに収まるよう広めに確保する。
+    for col, width in zip("ABCDEF", [11, 15, 11, 15, 11, 15], strict=True):
         ws.column_dimensions[col].width = width
+
+    # デフォルト行高(15pt)だと14pt文字などが見切れるため、使用する行の高さを
+    # 明示的に確保する。
+    for r in range(1, 18):
+        ws.row_dimensions[r].height = 20
+    ws.row_dimensions[5].height = 26  # 氏名(14pt)
 
     _set(ws, "A1", "履歴書", TITLE_FONT, CENTER)
     ws.merge_cells("A1:C2")

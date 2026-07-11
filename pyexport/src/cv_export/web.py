@@ -13,6 +13,7 @@ import os
 import secrets
 import subprocess
 import tempfile
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -85,6 +86,20 @@ AuthDep = Annotated[None, Depends(require_auth)]
 app = FastAPI(title="cv-export web")
 if STATIC_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.middleware("http")
+async def _disable_caching(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    """フォームHTML/JS/CSSをブラウザにキャッシュさせない。
+
+    開発中に頻繁に更新するため、リロードのたびに最新内容が反映されるよう
+    常に再検証させる（生成された添付ファイルのダウンロードには影響しない）。
+    """
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
 
 
 @app.on_event("startup")

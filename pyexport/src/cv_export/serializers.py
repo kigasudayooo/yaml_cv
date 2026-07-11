@@ -96,7 +96,9 @@ def rirekisho_json_to_yaml(payload: dict[str, Any]) -> str:
             data[key] = value if value.endswith("\n") else f"{value}\n"
     for key in RIREKISHO_LIST_FIELDS:
         items = _clean_history_items(payload.get(key))
-        if items:
+        # make_cv.rb の education_experience は data["education"]/["experience"] に
+        # 対して無条件で .each を呼ぶため、空でもキー自体は必ず出力する必要がある。
+        if items or key in ("education", "experience"):
             data[key] = items
     return yaml.safe_dump(data, allow_unicode=True, sort_keys=False)
 

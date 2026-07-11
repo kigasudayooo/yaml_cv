@@ -11,7 +11,12 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm
 from docx.table import Table
 
-from cv_export.styling import load_rirekisho_data, set_japanese_font
+from cv_export.styling import load_rirekisho_data, set_fixed_column_widths, set_japanese_font
+
+# ページ幅21cm・左右余白1.5cmずつを想定した本文幅(18cm)を基準にした列幅構成。
+BASIC_TABLE_WIDTHS = [2.4, 6.6, 2.4, 6.6]
+HISTORY_TABLE_WIDTHS = [18.0]
+MISC_TABLE_WIDTHS = [6.0, 6.0, 6.0]
 
 
 def _history_lines(items: list[dict[str, Any]]) -> list[str]:
@@ -65,6 +70,7 @@ def build_rirekisho_document(data: dict[str, Any]) -> DocumentObject:
 
     basic = document.add_table(rows=6, cols=4)
     basic.style = "Table Grid"
+    set_fixed_column_widths(basic, BASIC_TABLE_WIDTHS)
     _fill_cell(basic, 0, 0, "ふりがな", size=8)
     _fill_cell(basic, 0, 1, str(data.get("name_kana", "")))
     basic.cell(0, 1).merge(basic.cell(0, 3))
@@ -102,6 +108,7 @@ def build_rirekisho_document(data: dict[str, Any]) -> DocumentObject:
     history_lines = ["【学歴】", *edu, "【職歴】", *exp, "以上"]
     history_table = document.add_table(rows=len(history_lines), cols=1)
     history_table.style = "Table Grid"
+    set_fixed_column_widths(history_table, HISTORY_TABLE_WIDTHS)
     for i, line in enumerate(history_lines):
         _fill_cell(history_table, i, 0, line)
 
@@ -116,6 +123,7 @@ def build_rirekisho_document(data: dict[str, Any]) -> DocumentObject:
     if licences:
         lic_table = document.add_table(rows=len(licences), cols=1)
         lic_table.style = "Table Grid"
+        set_fixed_column_widths(lic_table, HISTORY_TABLE_WIDTHS)
         for i, line in enumerate(licences):
             _fill_cell(lic_table, i, 0, line)
 
@@ -130,6 +138,7 @@ def build_rirekisho_document(data: dict[str, Any]) -> DocumentObject:
     misc_val.cells[0].text = str(data.get("commuting_time", ""))
     misc_val.cells[1].text = str(data.get("dependents", ""))
     misc_val.cells[2].text = str(data.get("spouse", ""))
+    set_fixed_column_widths(misc, MISC_TABLE_WIDTHS)
 
     for label, key in (
         ("趣味・特技", "hobby"),

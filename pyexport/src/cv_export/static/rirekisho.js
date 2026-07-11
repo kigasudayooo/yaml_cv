@@ -121,18 +121,19 @@ document.getElementById("btn-import").addEventListener("click", async () => {
   }
 });
 
-// data.yaml の書き出し
+// data.yaml の書き出し（ブラウザのダウンロードフォルダではなく、サーバのローカル
+// ディスク上の ignore/ ディレクトリに保存する。ローカルで動かしている前提）。
 document.getElementById("btn-export-yaml").addEventListener("click", async () => {
   const statusEl = document.getElementById("import-status");
   try {
-    const response = await fetch("/export/rirekisho", {
+    const response = await fetch("/export/rirekisho-local", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(collectFormData()),
     });
-    if (!response.ok) throw new Error(`書き出しに失敗しました (${response.status})`);
-    const text = await response.text();
-    downloadText(text, "data.yaml", "application/x-yaml");
+    if (!response.ok) throw new Error(`保存に失敗しました (${response.status})`);
+    const result = await response.json();
+    flashStatus(statusEl, `保存しました: ${result.path}`, 6000);
   } catch (err) {
     flashStatus(statusEl, err.message, 5000);
   }

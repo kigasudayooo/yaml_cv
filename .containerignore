@@ -10,3 +10,4 @@ sample/
 *.xlsx
 !pyexport/src/cv_export/templates/*.docx
 !pyexport/src/cv_export/templates/*.xlsx
+ignore/

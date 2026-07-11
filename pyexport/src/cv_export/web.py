@@ -39,6 +39,9 @@ REPO_ROOT = Path(os.environ.get("CV_EXPORT_REPO_ROOT", "/app"))
 MAKE_CV_RB = REPO_ROOT / "make_cv.rb"
 STYLE_TXT = REPO_ROOT / "style.txt"
 STATIC_DIR = Path(__file__).parent / "static"
+# 実データ(個人情報)を含む data.yaml のローカル保存先。.gitignore/.containerignore で
+# 追跡対象外にしている（ブラウザのダウンロードフォルダに出したくない用途向け）。
+LOCAL_SAVE_DIR = REPO_ROOT / "ignore"
 
 PDF_MEDIA_TYPE = "application/pdf"
 XLSX_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -426,6 +429,26 @@ async def import_shokumu(_auth: AuthDep, request: Request) -> dict[str, Any]:
 async def export_rirekisho(_auth: AuthDep, payload: dict[str, Any]) -> str:
     """フォーム入力(JSON)を data.yaml 形式のテキストに変換する。"""
     return rirekisho_json_to_yaml(payload)
+
+
+@app.post("/export/rirekisho-local")
+async def export_rirekisho_local(_auth: AuthDep, payload: dict[str, Any]) -> dict[str, str]:
+    """フォーム入力(JSON)を data.yaml に変換し、サーバのローカルディスク
+    （LOCAL_SAVE_DIR 配下）へ保存する。
+
+    ブラウザのダウンロードフォルダに実データファイルを残したくない場合向け。
+    ローカルで動かしている前提のため、サーバ上のファイルをそのまま上書きする。
+
+    Args:
+        payload: rirekisho.html が送信するフォーム内容の JSON dict。
+
+    Returns:
+        保存先パスを含む dict。
+    """
+    LOCAL_SAVE_DIR.mkdir(parents=True, exist_ok=True)
+    output_path = LOCAL_SAVE_DIR / "data.yaml"
+    output_path.write_text(rirekisho_json_to_yaml(payload), encoding="utf-8")
+    return {"path": str(output_path)}
 
 
 @app.post("/export/shokumu", response_class=PlainTextResponse)

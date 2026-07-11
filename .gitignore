@@ -29,3 +29,6 @@ data.local.yml
 *.local.yml
 private/
 personal/
+
+# ローカルでの実データ保存先（Webフォームからのdata.yaml書き出し等）。追跡しない。
+ignore/

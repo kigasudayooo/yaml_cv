@@ -1,4 +1,16 @@
-"""data.yaml（既存の履歴書データ形式）から履歴書 .docx を生成する。"""
+"""公式テンプレート(templates/rirekisho_template.docx)に data.yaml の内容を差し込んで
+履歴書 .docx を生成する。
+
+テンプレートは B5 サイズの厚生労働省系標準フォーマット相当で、以下の構成を持つ:
+- tables[0]: 基本情報（氏名・生年月日・住所・連絡先など、8行×可変列）
+- tables[1]: 学歴・職歴 テーブル（1ページ目、年/月/内容の3列 × 14データ行）
+- tables[2]: 学歴・職歴の続き（8行）+ 資格・免許（6行）
+- tables[3]: 志望の動機など（自由記述）
+- tables[4]: 本人希望記入欄（自由記述）
+
+行・列のインデックスはテンプレートの生XML構造を解析して確認したもの。
+テンプレート自体の体裁（罫線・フォント・列幅）は変更せず、値の差し込みのみ行う。
+"""
 
 from __future__ import annotations
 
@@ -7,152 +19,137 @@ from typing import Any
 
 from docx import Document
 from docx.document import Document as DocumentObject
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Cm
-from docx.table import Table
+from docx.table import _Cell
 
-from cv_export.styling import load_rirekisho_data, set_fixed_column_widths, set_japanese_font
+from cv_export.styling import load_rirekisho_data, set_japanese_font
 
-# ページ幅21cm・左右余白1.5cmずつを想定した本文幅(18cm)を基準にした列幅構成。
-BASIC_TABLE_WIDTHS = [2.4, 6.6, 2.4, 6.6]
-HISTORY_TABLE_WIDTHS = [18.0]
-MISC_TABLE_WIDTHS = [6.0, 6.0, 6.0]
+TEMPLATE_PATH = Path(__file__).parent / "templates" / "rirekisho_template.docx"
+TEMPLATE_FONT = "ＭＳ 明朝"
+VALUE_SIZE = 10.5
 
 
-def _history_lines(items: list[dict[str, Any]]) -> list[str]:
-    lines = []
-    for item in items:
-        year = str(item.get("year", ""))
-        month = str(item.get("month", ""))
-        value = str(item.get("value", ""))
-        prefix = f"{year}年{month}月" if year or month else ""
-        lines.append(f"{prefix} {value}".strip())
-    return lines
+def _set_cell_text(cell: _Cell, text: str) -> None:
+    """セルの最初の run のテキストを差し替える（既存の書式を極力維持する）。
+
+    テンプレートの空欄セルは書式付きの空 run を持つことが多いため、run自体は
+    使い回してテキストだけ書き換える。run が無い場合のみ新規追加する。
+    """
+    paragraph = cell.paragraphs[0]
+    if paragraph.runs:
+        run = paragraph.runs[0]
+        run.text = text
+        for extra in paragraph.runs[1:]:
+            extra.text = ""
+    else:
+        run = paragraph.add_run(text)
+        set_japanese_font(run, name=TEMPLATE_FONT, size=VALUE_SIZE)
 
 
-def _fill_cell(
-    table: Table, row: int, col: int, text: str, size: float = 10.5, bold: bool = False
-) -> None:
-    cell = table.cell(row, col)
-    cell.text = ""
-    p = cell.paragraphs[0]
+def _append_line(cell: _Cell, text: str) -> None:
+    """セル内の既存テキスト(ラベル)の下に、新しい段落として値を追記する。"""
+    if not text:
+        return
+    p = cell.add_paragraph()
     run = p.add_run(text)
-    run.bold = bold
-    set_japanese_font(run, size=size)
+    set_japanese_font(run, name=TEMPLATE_FONT, size=VALUE_SIZE)
+
+
+def _combined_history_entries(data: dict[str, Any]) -> list[tuple[str, str, str]]:
+    entries: list[tuple[str, str, str]] = [("", "", "学歴")]
+    for item in data.get("education", []) or []:
+        entries.append(
+            (str(item.get("year", "")), str(item.get("month", "")), str(item.get("value", "")))
+        )
+    entries.append(("", "", "職歴"))
+    for item in data.get("experience", []) or []:
+        entries.append(
+            (str(item.get("year", "")), str(item.get("month", "")), str(item.get("value", "")))
+        )
+    entries.append(("", "", "以上"))
+    return entries
+
+
+def _licence_entries(data: dict[str, Any]) -> list[tuple[str, str, str]]:
+    return [
+        (str(item.get("year", "")), str(item.get("month", "")), str(item.get("value", "")))
+        for item in (data.get("licences", []) or [])
+    ]
+
+
+def _fill_entry_rows(
+    rows_cells: list[tuple[_Cell, _Cell, _Cell]], entries: list[tuple[str, str, str]]
+) -> None:
+    for (year_cell, month_cell, value_cell), (year, month, value) in zip(
+        rows_cells, entries, strict=False
+    ):
+        _set_cell_text(year_cell, year)
+        _set_cell_text(month_cell, month)
+        _set_cell_text(value_cell, value)
 
 
 def build_rirekisho_document(data: dict[str, Any]) -> DocumentObject:
-    """履歴書データから python-docx Document を組み立てる。
+    """公式テンプレートに履歴書データを差し込んで python-docx Document を組み立てる。
 
     Args:
         data: load_rirekisho_data で読み込んだ data.yaml 相当の dict。
 
     Returns:
-        構築済みの python-docx Document。
+        テンプレートに値を差し込んだ python-docx Document。
     """
-    document = Document()
-    section = document.sections[0]
-    section.page_width = Cm(21.0)
-    section.page_height = Cm(29.7)
-    for margin in ("top_margin", "bottom_margin", "left_margin", "right_margin"):
-        setattr(section, margin, Cm(1.5))
+    document = Document(str(TEMPLATE_PATH))
 
-    title_p = document.add_paragraph()
-    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_run = title_p.add_run("履　歴　書")
-    title_run.bold = True
-    set_japanese_font(title_run, size=18)
+    basic = document.tables[0]
+    rows = basic.rows
 
-    date_p = document.add_paragraph()
-    date_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    date_run = date_p.add_run(str(data.get("date", "")))
-    set_japanese_font(date_run, size=10)
+    # 各行の row.cells は gridSpan に応じて同一セルが繰り返し出現する
+    # （例: 行0は 履歴書(span2)+日付(span1) で合計3、行1以降はラベル(span1)+
+    # 値(span2)+右欄(span1) で合計4）。そのため「右端の欄」のインデックスは
+    # 行によって 2 だったり 3 だったりする点に注意。
+    _set_cell_text(rows[0].cells[2], str(data.get("date", "")))
+    _set_cell_text(rows[1].cells[1], str(data.get("name_kana", "")))
+    _set_cell_text(rows[2].cells[1], str(data.get("name", "")))
+    _set_cell_text(rows[3].cells[1], str(data.get("birth_day", "")))
+    _append_line(rows[3].cells[3], str(data.get("gender", "")))
 
-    basic = document.add_table(rows=6, cols=4)
-    basic.style = "Table Grid"
-    set_fixed_column_widths(basic, BASIC_TABLE_WIDTHS)
-    _fill_cell(basic, 0, 0, "ふりがな", size=8)
-    _fill_cell(basic, 0, 1, str(data.get("name_kana", "")))
-    basic.cell(0, 1).merge(basic.cell(0, 3))
-    _fill_cell(basic, 1, 0, "氏名", size=8)
-    _fill_cell(basic, 1, 1, str(data.get("name", "")), size=14, bold=True)
-    basic.cell(1, 1).merge(basic.cell(1, 3))
-    _fill_cell(basic, 2, 0, "生年月日", size=8)
-    _fill_cell(basic, 2, 1, str(data.get("birth_day", "")))
-    _fill_cell(basic, 2, 2, "性別", size=8)
-    _fill_cell(basic, 2, 3, str(data.get("gender", "")))
-    _fill_cell(basic, 3, 0, "携帯電話", size=8)
-    _fill_cell(basic, 3, 1, str(data.get("cell_phone", "")))
-    _fill_cell(basic, 3, 2, "E-MAIL", size=8)
-    _fill_cell(basic, 3, 3, str(data.get("email", "")))
+    _set_cell_text(rows[4].cells[1], str(data.get("address_kana", "")))
+    # テンプレートには現住所ブロックに「電話」欄が1つのみ（携帯電話欄は無い）。
+    # 固定電話(tel)があればそれを、無ければ携帯電話(cell_phone)を入れる。
+    tel_primary = str(data.get("tel", "")) or str(data.get("cell_phone", ""))
+    _append_line(rows[4].cells[3], tel_primary)
+
     zip_ = str(data.get("address_zip", ""))
     addr = str(data.get("address", ""))
-    _fill_cell(basic, 4, 0, "現住所", size=8)
-    _fill_cell(basic, 4, 1, f"〒{zip_}　{addr}" if zip_ or addr else "")
-    basic.cell(4, 1).merge(basic.cell(4, 3))
+    _set_cell_text(rows[5].cells[1], f"〒{zip_}　{addr}" if zip_ or addr else "〒")
+    _append_line(rows[5].cells[3], str(data.get("email", "")))
+
+    _set_cell_text(rows[6].cells[1], str(data.get("address_kana2", "")))
+    _append_line(rows[6].cells[3], str(data.get("tel2", "")))
+
     zip2 = str(data.get("address_zip2", ""))
     addr2 = str(data.get("address2", ""))
-    _fill_cell(basic, 5, 0, "連絡先", size=8)
-    _fill_cell(basic, 5, 1, f"〒{zip2}　{addr2}" if zip2 or addr2 else "")
-    basic.cell(5, 1).merge(basic.cell(5, 3))
+    _set_cell_text(rows[7].cells[1], f"〒{zip2}　{addr2}" if zip2 or addr2 else "〒")
+    # data.yaml には連絡先専用のメールアドレス項目が無いため、連絡先ブロックの
+    # E-mail欄は空のままにする（同じ email を重複表示しない）。
 
-    document.add_paragraph()
+    history_entries = _combined_history_entries(data)
 
-    heading_p = document.add_paragraph()
-    heading_run = heading_p.add_run("学歴・職歴")
-    heading_run.bold = True
-    set_japanese_font(heading_run, size=11)
+    table1_rows = [(r.cells[0], r.cells[1], r.cells[2]) for r in document.tables[1].rows[1:]]
+    table2 = document.tables[2]
+    table2_history_rows = [(r.cells[0], r.cells[1], r.cells[2]) for r in table2.rows[1:9]]
+    table2_licence_rows = [(r.cells[0], r.cells[1], r.cells[2]) for r in table2.rows[10:16]]
 
-    edu = _history_lines(data.get("education", []))
-    exp = _history_lines(data.get("experience", []))
-    history_lines = ["【学歴】", *edu, "【職歴】", *exp, "以上"]
-    history_table = document.add_table(rows=len(history_lines), cols=1)
-    history_table.style = "Table Grid"
-    set_fixed_column_widths(history_table, HISTORY_TABLE_WIDTHS)
-    for i, line in enumerate(history_lines):
-        _fill_cell(history_table, i, 0, line)
+    _fill_entry_rows(table1_rows + table2_history_rows, history_entries)
+    _fill_entry_rows(table2_licence_rows, _licence_entries(data))
 
-    document.add_paragraph()
+    motivation = str(data.get("motivation", "")).strip()
+    hobby = str(data.get("hobby", "")).strip()
+    if hobby:
+        motivation = (
+            f"{motivation}\n\n【趣味・特技】\n{hobby}" if motivation else f"【趣味・特技】\n{hobby}"
+        )
+    _set_cell_text(document.tables[3].rows[1].cells[0], motivation)
 
-    lic_heading = document.add_paragraph()
-    lic_run = lic_heading.add_run("免許・資格")
-    lic_run.bold = True
-    set_japanese_font(lic_run, size=11)
-
-    licences = _history_lines(data.get("licences", []))
-    if licences:
-        lic_table = document.add_table(rows=len(licences), cols=1)
-        lic_table.style = "Table Grid"
-        set_fixed_column_widths(lic_table, HISTORY_TABLE_WIDTHS)
-        for i, line in enumerate(licences):
-            _fill_cell(lic_table, i, 0, line)
-
-    document.add_paragraph()
-
-    misc = document.add_table(rows=1, cols=3)
-    misc.style = "Table Grid"
-    _fill_cell(misc, 0, 0, "通勤時間", size=8)
-    _fill_cell(misc, 0, 1, "扶養家族", size=8)
-    _fill_cell(misc, 0, 2, "配偶者", size=8)
-    misc_val = misc.add_row()
-    misc_val.cells[0].text = str(data.get("commuting_time", ""))
-    misc_val.cells[1].text = str(data.get("dependents", ""))
-    misc_val.cells[2].text = str(data.get("spouse", ""))
-    set_fixed_column_widths(misc, MISC_TABLE_WIDTHS)
-
-    for label, key in (
-        ("趣味・特技", "hobby"),
-        ("志望動機", "motivation"),
-        ("本人希望記入欄", "request"),
-    ):
-        document.add_paragraph()
-        hp = document.add_paragraph()
-        hrun = hp.add_run(label)
-        hrun.bold = True
-        set_japanese_font(hrun, size=11)
-        vp = document.add_paragraph()
-        vrun = vp.add_run(str(data.get(key, "")))
-        set_japanese_font(vrun, size=10.5)
+    _set_cell_text(document.tables[4].rows[1].cells[0], str(data.get("request", "")))
 
     return document
 

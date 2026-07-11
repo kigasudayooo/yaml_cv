@@ -12,6 +12,9 @@ pyexport/.ruff_cache/
 pyexport/web.log
 *.docx
 *.xlsx
+# 個人情報を含まない配布用テンプレートは明示的に許可する
+!pyexport/src/cv_export/templates/*.docx
+!pyexport/src/cv_export/templates/*.xlsx
 
 # Deploy secrets
 deploy/web.env

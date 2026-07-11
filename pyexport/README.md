@@ -57,6 +57,14 @@ uv run cv-export rirekisho-excel -i ../data.yaml -o rirekisho.xlsx
 uv run cv-export rirekisho-word  -i ../data.yaml -o rirekisho.docx
 ```
 
+Excel/Word 出力は `cv_export/templates/rirekisho_template.{xlsx,docx}`（B5サイズの
+標準的な履歴書フォーマット）に値を差し込む方式です。テンプレート自体の罫線・
+フォント・列幅は変更せず、対応するセル/表の行に値を書き込みます。
+このテンプレートには「通勤時間・扶養家族・配偶者・配偶者の扶養義務」欄が無いため、
+`data.yaml` にこれらを記載していても Excel/Word には反映されません（PDF出力
+[`style.txt`] 側には引き続き反映されます）。「趣味・特技」も専用欄が無いため、
+志望動機欄に追記する形で出力されます。
+
 ### Webサーバー（ローカル起動）
 
 CLIとは別に、ブラウザから使える簡易Webサーバーもあります

@@ -4,12 +4,13 @@
 <meta charset="utf-8">
 <title>履歴書の作成 - yaml_cv</title>
 <link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/sheet.css">
 </head>
-<body>
+<body class="sheet-body">
 <nav><a href="/">トップ</a><a href="/shokumu">職務経歴書の作成</a></nav>
 <h1>履歴書の作成</h1>
 <p class="hint">
-  入力内容はこのブラウザ内にのみ自動保存されます（サーバには送信・保存されません）。
+  下の用紙に直接入力してください。入力内容はこのブラウザ内にのみ自動保存されます（サーバには送信・保存されません）。
   生成ボタンを押したときだけ、その時点の入力内容が変換のためサーバへ送られます。
 </p>
 
@@ -25,102 +26,171 @@
 </div>
 
 <form id="rirekisho-form">
-  <section>
-    <h2>基本情報</h2>
-    <label>作成日 <input type="text" name="date" placeholder="2026年 7月 11日現在"></label>
-    <label>ふりがな <input type="text" name="name_kana"></label>
-    <label>氏名 <input type="text" name="name"></label>
-    <label>生年月日 <input type="text" name="birth_day" placeholder="1990年1月1日 (満36歳)"></label>
-    <label>性別 <input type="text" name="gender"></label>
-    <label>携帯電話 <input type="text" name="cell_phone"></label>
-    <label>E-mail <input type="text" name="email"></label>
-    <label>証明写真
-      <input type="file" id="photo-file" accept="image/*">
-      <span class="hint">生成時にのみアップロードされます（下書き保存の対象外）。</span>
-    </label>
-  </section>
+<div class="sheet">
 
-  <section>
-    <h2>現住所・連絡先</h2>
-    <label>ふりがな（現住所） <input type="text" name="address_kana"></label>
-    <label>現住所 <input type="text" name="address"></label>
-    <label>郵便番号（現住所） <input type="text" name="address_zip"></label>
-    <label>電話番号（現住所） <input type="text" name="tel"></label>
-    <label>FAX（現住所） <input type="text" name="fax"></label>
-    <label>ふりがな（連絡先） <input type="text" name="address_kana2"></label>
-    <label>連絡先住所 <input type="text" name="address2"></label>
-    <label>郵便番号（連絡先） <input type="text" name="address_zip2"></label>
-    <label>電話番号（連絡先） <input type="text" name="tel2"></label>
-    <label>FAX（連絡先） <input type="text" name="fax2"></label>
-  </section>
+  <div class="sheet-header">
+    <span class="sheet-title">履　歴　書</span>
+    <span class="sheet-date">
+      <input type="text" name="date" placeholder="2026年 7月 11日現在" class="cell-input date-input">
+    </span>
+  </div>
 
-  <section>
-    <h2>学位</h2>
-    <label>学位 <input type="text" name="degree"></label>
-    <label>取得年度 <input type="text" name="degree_year"></label>
-    <label>授与機関 <input type="text" name="degree_affiliation"></label>
-    <label>学位論文タイトル <input type="text" name="thesis_title"></label>
-  </section>
+  <div class="sheet-top">
+    <table class="doc-table basic-table">
+      <tr>
+        <td class="label-cell">ふりがな</td>
+        <td colspan="3"><input type="text" name="name_kana" class="cell-input"></td>
+      </tr>
+      <tr>
+        <td class="label-cell">氏　名</td>
+        <td colspan="3"><input type="text" name="name" class="cell-input name-input"></td>
+      </tr>
+      <tr>
+        <td class="label-cell">生年月日</td>
+        <td><input type="text" name="birth_day" placeholder="1990年1月1日 (満36歳)" class="cell-input"></td>
+        <td class="label-cell narrow-label">性別</td>
+        <td><input type="text" name="gender" class="cell-input"></td>
+      </tr>
+      <tr>
+        <td class="label-cell">携帯電話</td>
+        <td><input type="text" name="cell_phone" class="cell-input"></td>
+        <td class="label-cell narrow-label">E-MAIL</td>
+        <td><input type="text" name="email" class="cell-input"></td>
+      </tr>
+    </table>
 
-  <section>
-    <h2>学歴</h2>
-    <div id="education-rows"></div>
-    <button type="button" class="small" data-add-row="education">+ 学歴を追加</button>
-  </section>
+    <div class="photo-box">
+      <label for="photo-file" class="photo-label">
+        <img id="photo-preview" alt="証明写真プレビュー" hidden>
+        <span id="photo-placeholder">写真を貼る位置<br>縦36〜40mm<br>横24〜30mm</span>
+      </label>
+      <input type="file" id="photo-file" accept="image/*" hidden>
+    </div>
+  </div>
 
-  <section>
-    <h2>職歴</h2>
-    <div id="experience-rows"></div>
-    <button type="button" class="small" data-add-row="experience">+ 職歴を追加</button>
-  </section>
+  <table class="doc-table address-table">
+    <tr>
+      <td class="label-cell">ふりがな</td>
+      <td colspan="3"><input type="text" name="address_kana" class="cell-input"></td>
+    </tr>
+    <tr>
+      <td class="label-cell">現住所</td>
+      <td class="narrow-label">〒<input type="text" name="address_zip" class="cell-input zip-input"></td>
+      <td colspan="2"><input type="text" name="address" class="cell-input"></td>
+    </tr>
+    <tr>
+      <td class="label-cell">電話</td>
+      <td><input type="text" name="tel" class="cell-input"></td>
+      <td class="label-cell narrow-label">FAX</td>
+      <td><input type="text" name="fax" class="cell-input"></td>
+    </tr>
+    <tr>
+      <td class="label-cell">ふりがな</td>
+      <td colspan="3"><input type="text" name="address_kana2" class="cell-input"></td>
+    </tr>
+    <tr>
+      <td class="label-cell">連絡先</td>
+      <td class="narrow-label">〒<input type="text" name="address_zip2" class="cell-input zip-input"></td>
+      <td colspan="2"><input type="text" name="address2" class="cell-input"></td>
+    </tr>
+    <tr>
+      <td class="label-cell">電話</td>
+      <td><input type="text" name="tel2" class="cell-input"></td>
+      <td class="label-cell narrow-label">FAX</td>
+      <td><input type="text" name="fax2" class="cell-input"></td>
+    </tr>
+  </table>
 
-  <section>
-    <h2>免許・資格</h2>
-    <div id="licences-rows"></div>
-    <button type="button" class="small" data-add-row="licences">+ 資格を追加</button>
-  </section>
+  <div class="section-box">
+    <div class="section-caption">学歴・職歴（各項目ごとにまとめて書く）</div>
+    <table class="doc-table history-table">
+      <colgroup>
+        <col class="col-year"><col class="col-month"><col>
+      </colgroup>
+      <tr class="group-label-row">
+        <td colspan="3">学歴</td>
+      </tr>
+      <tbody id="education-rows"></tbody>
+      <tr class="group-label-row">
+        <td colspan="3">職歴</td>
+      </tr>
+      <tbody id="experience-rows"></tbody>
+      <tr class="final-row">
+        <td colspan="3">以上</td>
+      </tr>
+    </table>
+    <div class="row-add-buttons">
+      <button type="button" class="small" data-add-row="education">+ 学歴の行を追加</button>
+      <button type="button" class="small" data-add-row="experience">+ 職歴の行を追加</button>
+    </div>
+  </div>
 
-  <section>
-    <h2>主な受賞・表彰等</h2>
-    <div id="awards-rows"></div>
-    <button type="button" class="small" data-add-row="awards">+ 受賞を追加</button>
-  </section>
+  <div class="section-box">
+    <div class="section-caption">免許・資格</div>
+    <table class="doc-table history-table">
+      <colgroup>
+        <col class="col-year"><col class="col-month"><col>
+      </colgroup>
+      <tbody id="licences-rows"></tbody>
+    </table>
+    <div class="row-add-buttons">
+      <button type="button" class="small" data-add-row="licences">+ 資格の行を追加</button>
+    </div>
+  </div>
 
-  <section>
-    <h2>その他</h2>
-    <label>教育歴 <textarea name="teaching"></textarea></label>
-    <label>所属学会 <textarea name="affiliated_society"></textarea></label>
-    <label>その他特記事項 <textarea name="notices"></textarea></label>
-    <label>通勤時間 <input type="text" name="commuting_time"></label>
-    <label>扶養家族数（配偶者を除く） <input type="text" name="dependents"></label>
-    <label>配偶者の有無 <input type="text" name="spouse"></label>
-    <label>配偶者の扶養義務 <input type="text" name="supporting_spouse"></label>
-    <label>趣味・特技 <textarea name="hobby"></textarea></label>
-    <label>志望動機 <textarea name="motivation"></textarea></label>
-    <label>本人希望記入欄 <textarea name="request"></textarea></label>
-  </section>
+  <table class="doc-table misc-table">
+    <tr>
+      <td class="label-cell">通勤時間</td>
+      <td><input type="text" name="commuting_time" class="cell-input"></td>
+      <td class="label-cell">扶養家族<br><span class="tiny">(配偶者を除く)</span></td>
+      <td><input type="text" name="dependents" class="cell-input"></td>
+      <td class="label-cell">配偶者</td>
+      <td><input type="text" name="spouse" class="cell-input"></td>
+      <td class="label-cell">配偶者の<br>扶養義務</td>
+      <td><input type="text" name="supporting_spouse" class="cell-input"></td>
+    </tr>
+  </table>
 
-  <section>
-    <h2>出力</h2>
-    <label>出力形式
-      <select name="format">
-        <option value="pdf">PDF</option>
-        <option value="excel">Excel (.xlsx)</option>
-        <option value="word">Word (.docx)</option>
-      </select>
-    </label>
-    <button type="submit" class="primary">履歴書を生成してダウンロード</button>
-    <span class="status" id="generate-status"></span>
-  </section>
+  <div class="section-box">
+    <div class="section-caption">趣味・特技</div>
+    <textarea name="hobby" class="cell-input box-textarea"></textarea>
+  </div>
+
+  <div class="section-box">
+    <div class="section-caption">志望動機</div>
+    <textarea name="motivation" class="cell-input box-textarea"></textarea>
+  </div>
+
+  <div class="section-box">
+    <div class="section-caption">本人希望記入欄</div>
+    <textarea name="request" class="cell-input box-textarea"></textarea>
+  </div>
+
+</div>
+
+<section class="output-section">
+  <h2>出力</h2>
+  <label>出力形式
+    <select name="format">
+      <option value="pdf">PDF</option>
+      <option value="excel">Excel (.xlsx)</option>
+      <option value="word">Word (.docx)</option>
+    </select>
+  </label>
+  <button type="submit" class="primary">履歴書を生成してダウンロード</button>
+  <span class="status" id="generate-status"></span>
+</section>
 </form>
 
 <template id="history-row-template">
-  <div class="row" data-history-row>
-    <div class="narrow"><input type="text" data-field="year" placeholder="年"></div>
-    <div class="narrow"><input type="text" data-field="month" placeholder="月"></div>
-    <div><input type="text" data-field="value" placeholder="内容"></div>
-    <div class="narrow"><button type="button" class="small danger" data-remove-row>削除</button></div>
-  </div>
+  <tr data-history-row>
+    <td><input type="text" data-field="year" class="cell-input narrow-cell" placeholder="年"></td>
+    <td><input type="text" data-field="month" class="cell-input narrow-cell" placeholder="月"></td>
+    <td class="value-cell">
+      <input type="text" data-field="value" class="cell-input" placeholder="内容">
+      <button type="button" class="small danger row-remove" data-remove-row>削除</button>
+    </td>
+  </tr>
 </template>
 
 <script src="/static/common.js"></script>

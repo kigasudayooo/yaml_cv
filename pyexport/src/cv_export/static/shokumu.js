@@ -13,7 +13,7 @@ function scheduleSave() {
 // --- テキスト一覧（学歴・箇条書き・スキル項目・ブロック項目 共通） ---
 
 function addTextListRow(container, value = "") {
-  const node = tpl("tpl-text-list-row").cloneNode(true);
+  const node = tpl("tpl-bullet-row").cloneNode(true);
   const row = node.querySelector("[data-text-row]");
   row.querySelector("[data-line]").value = value;
   row.querySelector("[data-remove]").addEventListener("click", () => {

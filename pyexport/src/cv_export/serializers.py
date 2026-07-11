@@ -33,10 +33,6 @@ RIREKISHO_SCALAR_FIELDS = (
     "address_zip2",
     "tel2",
     "fax2",
-    "degree",
-    "degree_year",
-    "degree_affiliation",
-    "thesis_title",
     "commuting_time",
     "dependents",
     "spouse",
@@ -44,15 +40,12 @@ RIREKISHO_SCALAR_FIELDS = (
 )
 
 RIREKISHO_TEXT_FIELDS = (
-    "teaching",
-    "affiliated_society",
-    "notices",
     "hobby",
     "motivation",
     "request",
 )
 
-RIREKISHO_LIST_FIELDS = ("education", "experience", "licences", "awards")
+RIREKISHO_LIST_FIELDS = ("education", "experience", "licences")
 
 
 class HistoryItem(TypedDict, total=False):

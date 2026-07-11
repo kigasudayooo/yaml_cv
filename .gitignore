@@ -9,6 +9,7 @@ pyexport/.venv/
 pyexport/__pycache__/
 pyexport/**/__pycache__/
 pyexport/.ruff_cache/
+pyexport/web.log
 *.docx
 *.xlsx
 

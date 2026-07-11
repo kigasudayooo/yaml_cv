@@ -4,12 +4,13 @@
 <meta charset="utf-8">
 <title>職務経歴書の作成 - yaml_cv</title>
 <link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/sheet.css">
 </head>
-<body>
+<body class="sheet-body">
 <nav><a href="/">トップ</a><a href="/rirekisho">履歴書の作成</a></nav>
 <h1>職務経歴書の作成</h1>
 <p class="hint">
-  入力内容はこのブラウザ内にのみ自動保存されます（サーバには送信・保存されません）。
+  下の用紙に直接入力してください。入力内容はこのブラウザ内にのみ自動保存されます（サーバには送信・保存されません）。
   生成ボタンを押したときだけ、その時点の入力内容が変換のためサーバへ送られます。
 </p>
 
@@ -25,101 +26,112 @@
 </div>
 
 <form id="shokumu-form">
-  <section>
-    <h2>氏名</h2>
-    <label>氏名（任意） <input type="text" name="name"></label>
-  </section>
+<div class="sheet">
 
-  <section>
-    <h2>職務概要</h2>
-    <label>概要 <textarea name="summary" rows="4"></textarea></label>
-  </section>
+  <div class="doc-title">職 務 経 歴 書</div>
+  <div class="doc-meta">
+    氏名 <input type="text" name="name" class="cell-input">
+  </div>
 
-  <section>
-    <h2>学歴</h2>
-    <div id="education-list" class="text-list"></div>
+  <div class="sheet-section">
+    <div class="sheet-section-heading">職務概要</div>
+    <textarea name="summary" class="plain-textarea" rows="4"></textarea>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-section-heading">学歴</div>
+    <div id="education-list"></div>
     <button type="button" class="small" id="btn-add-education">+ 学歴を追加</button>
-  </section>
+  </div>
 
-  <section>
-    <h2>活かせる経験・知識・技術</h2>
+  <div class="sheet-section">
+    <div class="sheet-section-heading">活かせる経験・知識・技術</div>
     <div id="skill-groups"></div>
     <button type="button" class="small" id="btn-add-skill-group">+ 分類を追加</button>
-  </section>
+  </div>
 
-  <section>
-    <h2>職務経歴</h2>
+  <div class="sheet-section">
+    <div class="sheet-section-heading">職務経歴</div>
     <div id="companies"></div>
     <button type="button" class="small" id="btn-add-company">+ 会社を追加</button>
-  </section>
+  </div>
 
-  <section>
-    <h2>出力</h2>
-    <button type="submit" class="primary">職務経歴書を生成してダウンロード（Word）</button>
-    <span class="status" id="generate-status"></span>
-  </section>
+</div>
+
+<section class="output-section">
+  <h2>出力</h2>
+  <button type="submit" class="primary">職務経歴書を生成してダウンロード（Word）</button>
+  <span class="status" id="generate-status"></span>
+</section>
 </form>
 
 <!-- テンプレート群: JS の cloneNode で複製して使う -->
-<template id="tpl-text-list-row">
-  <div class="row" data-text-row>
+<template id="tpl-bullet-row">
+  <div class="bullet-row" data-text-row>
     <input type="text" data-line placeholder="内容">
-    <div class="narrow"><button type="button" class="small danger" data-remove>削除</button></div>
+    <button type="button" class="small danger" data-remove>削除</button>
   </div>
 </template>
 
 <template id="tpl-meta-row">
-  <div class="row" data-meta-row>
-    <input type="text" data-meta-key placeholder="キー（例: 期間）">
-    <input type="text" data-meta-value placeholder="値">
-    <div class="narrow"><button type="button" class="small danger" data-remove>削除</button></div>
+  <div class="meta-row" data-meta-row>
+    <input type="text" data-meta-key class="meta-key-input" placeholder="キー（例: 期間）">
+    <input type="text" data-meta-value class="meta-value-input" placeholder="値">
+    <button type="button" class="small danger" data-remove>削除</button>
   </div>
 </template>
 
 <template id="tpl-skill-group">
-  <fieldset data-skill-group>
-    <label>分類名 <input type="text" data-heading placeholder="例: プログラミング言語"></label>
-    <div class="text-list" data-items></div>
-    <button type="button" class="small" data-add-item>+ 項目を追加</button>
-    <button type="button" class="small danger" data-remove>この分類を削除</button>
-  </fieldset>
+  <div class="skill-group" data-skill-group>
+    <input type="text" data-heading class="skill-group-heading" placeholder="分類名（例: プログラミング言語）">
+    <div data-items></div>
+    <div class="card-toolbar">
+      <button type="button" class="small" data-add-item>+ 項目を追加</button>
+      <button type="button" class="small danger" data-remove>この分類を削除</button>
+    </div>
+  </div>
 </template>
 
 <template id="tpl-block">
-  <fieldset data-block>
-    <label>小見出し <input type="text" data-heading placeholder="例: 実施内容"></label>
-    <div class="text-list" data-items></div>
-    <button type="button" class="small" data-add-item>+ 項目を追加</button>
-    <button type="button" class="small danger" data-remove>この小見出しを削除</button>
-  </fieldset>
+  <div class="block-group" data-block>
+    <input type="text" data-heading class="block-heading-input" placeholder="小見出し（例: 実施内容）">
+    <div data-items></div>
+    <div class="card-toolbar">
+      <button type="button" class="small" data-add-item>+ 項目を追加</button>
+      <button type="button" class="small danger" data-remove>この小見出しを削除</button>
+    </div>
+  </div>
 </template>
 
 <template id="tpl-project">
-  <fieldset data-project>
-    <label>プロジェクト名 <input type="text" data-name></label>
-    <label class="hint">補足情報（期間・役割など）</label>
+  <div class="project-card" data-project>
+    <input type="text" data-name class="project-name-input" placeholder="プロジェクト名">
     <div data-meta></div>
-    <button type="button" class="small" data-add-meta>+ 補足情報を追加</button>
     <div data-blocks></div>
-    <button type="button" class="small" data-add-block>+ 小見出しを追加</button>
-    <button type="button" class="small danger" data-remove>このプロジェクトを削除</button>
-  </fieldset>
+    <div class="card-toolbar">
+      <button type="button" class="small" data-add-meta>+ 補足情報を追加</button>
+      <button type="button" class="small" data-add-block>+ 小見出しを追加</button>
+      <button type="button" class="small danger" data-remove>このプロジェクトを削除</button>
+    </div>
+  </div>
 </template>
 
 <template id="tpl-company">
-  <fieldset data-company>
-    <label>会社名 <input type="text" data-name></label>
-    <label>期間 <input type="text" data-period placeholder="例: 2020年4月 〜 現在"></label>
-    <label class="hint">補足情報（職種など）</label>
+  <div class="company-card" data-company>
+    <div class="company-head">
+      <input type="text" data-name class="company-name-input" placeholder="会社名">
+      <input type="text" data-period class="company-period-input" placeholder="期間（例: 2020年4月 〜 現在）">
+    </div>
     <div data-meta></div>
-    <button type="button" class="small" data-add-meta>+ 補足情報を追加</button>
-    <label class="hint">箇条書き（プロジェクトに紐付かない項目）</label>
-    <div class="text-list" data-items></div>
-    <button type="button" class="small" data-add-item>+ 項目を追加</button>
+    <div data-items></div>
     <div data-projects></div>
-    <button type="button" class="small" data-add-project>+ プロジェクトを追加</button>
-    <button type="button" class="small danger" data-remove>この会社を削除</button>
-  </fieldset>
+    <div class="card-toolbar">
+      <button type="button" class="small" data-add-meta>+ 補足情報を追加</button>
+      <button type="button" class="small" data-add-item>+ 箇条書きを追加</button>
+      <button type="button" class="small" data-add-project>+ プロジェクトを追加</button>
+      <button type="button" class="small danger" data-remove>この会社を削除</button>
+    </div>
+  </div>
 </template>
 
 <script src="/static/common.js"></script>

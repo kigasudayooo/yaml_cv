@@ -1,0 +1,403 @@
+/* 実際の紙の書類に近いレイアウトで直接入力させるための WYSIWYG スタイル。 */
+
+.sheet-body {
+  max-width: 900px;
+}
+
+.sheet {
+  background: #fff;
+  color: #111;
+  border: 2px solid #333;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sheet {
+    background: #fdfdfa;
+    color: #111;
+  }
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.sheet-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 0.3em;
+}
+
+.sheet-date {
+  font-size: 0.85rem;
+}
+
+.date-input {
+  width: 14rem;
+  text-align: right;
+}
+
+/* 罫線付きテーブル: 入力欄はテーブルの枠線に馴染むよう装飾を消す */
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-bottom: 0.5rem;
+}
+
+.doc-table td {
+  border: 1px solid #555;
+  padding: 0.15rem 0.35rem;
+  vertical-align: middle;
+}
+
+.label-cell {
+  width: 5.5rem;
+  font-size: 0.7rem;
+  color: #333;
+  background: #f4f4f0;
+  white-space: nowrap;
+}
+
+.narrow-label {
+  width: 3.5rem;
+}
+
+.tiny {
+  font-size: 0.6rem;
+  font-weight: normal;
+}
+
+.cell-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  font: inherit;
+  padding: 0.15rem 0.1rem;
+  color: inherit;
+}
+
+.cell-input:focus {
+  outline: 2px solid #2b6cb0;
+  outline-offset: -2px;
+  background: #eef6ff;
+}
+
+.name-input {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.zip-input {
+  width: 6rem;
+  display: inline-block;
+}
+
+.sheet-top {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.sheet-top .basic-table {
+  flex: 1;
+}
+
+.photo-box {
+  flex: 0 0 7rem;
+}
+
+.photo-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 7rem;
+  height: 9.3rem;
+  border: 1px dashed #555;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.65rem;
+  color: #666;
+  overflow: hidden;
+}
+
+.photo-label img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.section-box {
+  border: 1px solid #555;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-caption {
+  font-size: 0.75rem;
+  color: #333;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+}
+
+.history-table .col-year {
+  width: 3.5rem;
+}
+
+.history-table .col-month {
+  width: 3rem;
+}
+
+.narrow-cell {
+  text-align: center;
+}
+
+.group-label-row td {
+  background: #eee;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+
+.final-row td {
+  text-align: right;
+  font-weight: bold;
+  border-top: none;
+}
+
+.value-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none !important;
+}
+
+.value-cell .cell-input {
+  flex: 1;
+}
+
+.row-remove {
+  flex: 0 0 auto;
+  visibility: hidden;
+}
+
+tr:hover .row-remove {
+  visibility: visible;
+}
+
+.row-add-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.box-textarea {
+  width: 100%;
+  min-height: 4rem;
+  border: none;
+  resize: vertical;
+  font: inherit;
+  background: transparent;
+}
+
+.box-textarea:focus {
+  outline: 2px solid #2b6cb0;
+  background: #eef6ff;
+}
+
+.misc-table .label-cell {
+  width: auto;
+  font-size: 0.65rem;
+}
+
+.output-section {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+}
+
+/* --- 職務経歴書用 --- */
+
+.doc-title {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.25rem;
+}
+
+.doc-meta {
+  text-align: right;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  align-items: center;
+}
+
+.doc-meta input {
+  width: 10rem;
+}
+
+.sheet-section {
+  margin-bottom: 1.25rem;
+}
+
+.sheet-section-heading {
+  font-size: 1rem;
+  font-weight: bold;
+  border-bottom: 2px solid #444;
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.sheet-section-heading::before {
+  content: "■ ";
+}
+
+.plain-textarea {
+  width: 100%;
+  min-height: 4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font: inherit;
+  padding: 0.4rem;
+  box-sizing: border-box;
+}
+
+.bullet-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.bullet-list li {
+  margin-bottom: 0.2rem;
+}
+
+.bullet-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.bullet-row::before {
+  content: "・";
+}
+
+.bullet-row input {
+  flex: 1;
+  border: none;
+  border-bottom: 1px dotted #999;
+  background: transparent;
+  font: inherit;
+  padding: 0.1rem 0;
+}
+
+.bullet-row input:focus {
+  outline: none;
+  border-bottom: 1px solid #2b6cb0;
+}
+
+.skill-group,
+.block-group {
+  margin-bottom: 0.6rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid #ddd;
+}
+
+.skill-group-heading,
+.block-heading-input {
+  font-weight: bold;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #999;
+  margin-bottom: 0.3rem;
+  width: 100%;
+}
+
+.company-card {
+  border: 1px solid #999;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.company-head {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+
+.company-name-input {
+  font-weight: bold;
+  font-size: 1.05rem;
+  border: none;
+  border-bottom: 1px solid #999;
+  background: transparent;
+  flex: 1;
+}
+
+.company-period-input {
+  border: none;
+  border-bottom: 1px solid #999;
+  background: transparent;
+  width: 14rem;
+  text-align: right;
+  color: #444;
+}
+
+.project-card {
+  border-left: 3px solid #2b6cb0;
+  padding-left: 0.6rem;
+  margin: 0.6rem 0;
+}
+
+.project-name-input {
+  font-weight: bold;
+  border: none;
+  border-bottom: 1px dashed #999;
+  background: transparent;
+  width: 100%;
+  margin-bottom: 0.3rem;
+}
+
+.meta-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.9rem;
+}
+
+.meta-key-input {
+  flex: 0 0 8rem;
+  border: none;
+  border-bottom: 1px dotted #999;
+  background: transparent;
+  font: inherit;
+  font-weight: bold;
+}
+
+.meta-value-input {
+  flex: 1;
+  border: none;
+  border-bottom: 1px dotted #999;
+  background: transparent;
+  font: inherit;
+}
+
+.card-toolbar {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}

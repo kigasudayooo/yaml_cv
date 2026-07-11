@@ -2,15 +2,14 @@
 "use strict";
 
 const DRAFT_KEY = "yaml_cv:rirekisho:draft";
-const LIST_FIELDS = ["education", "experience", "licences", "awards"];
+const LIST_FIELDS = ["education", "experience", "licences"];
 const SCALAR_FIELDS = [
   "date", "name_kana", "name", "birth_day", "gender", "cell_phone", "email",
   "address_kana", "address", "address_zip", "tel", "fax",
   "address_kana2", "address2", "address_zip2", "tel2", "fax2",
-  "degree", "degree_year", "degree_affiliation", "thesis_title",
   "commuting_time", "dependents", "spouse", "supporting_spouse",
 ];
-const TEXT_FIELDS = ["teaching", "affiliated_society", "notices", "hobby", "motivation", "request"];
+const TEXT_FIELDS = ["hobby", "motivation", "request"];
 
 const form = document.getElementById("rirekisho-form");
 const rowTemplate = document.getElementById("history-row-template");
@@ -24,12 +23,16 @@ function addHistoryRow(listName, item = {}) {
   rowEl.querySelector('[data-field="value"]').value = item.value || "";
   rowEl.querySelector("[data-remove-row]").addEventListener("click", () => {
     rowEl.remove();
+    saveDraft(DRAFT_KEY, collectFormData());
   });
   container.appendChild(rowEl);
 }
 
 document.querySelectorAll("[data-add-row]").forEach((btn) => {
-  btn.addEventListener("click", () => addHistoryRow(btn.dataset.addRow));
+  btn.addEventListener("click", () => {
+    addHistoryRow(btn.dataset.addRow);
+    saveDraft(DRAFT_KEY, collectFormData());
+  });
 });
 
 function collectFormData() {
@@ -68,6 +71,23 @@ function ensureAtLeastOneRowEach() {
   }
 }
 
+// --- 写真プレビュー ---
+const photoInput = document.getElementById("photo-file");
+const photoPreview = document.getElementById("photo-preview");
+const photoPlaceholder = document.getElementById("photo-placeholder");
+
+photoInput.addEventListener("change", () => {
+  const file = photoInput.files && photoInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    photoPreview.src = String(reader.result);
+    photoPreview.hidden = false;
+    photoPlaceholder.hidden = true;
+  };
+  reader.readAsDataURL(file);
+});
+
 // 初期化: 下書きを復元、無ければ各リストに空行を1つ用意
 const draft = loadDraft(DRAFT_KEY);
 if (draft) {
@@ -78,7 +98,6 @@ if (draft) {
 
 // 入力の度に下書き保存
 form.addEventListener("input", () => saveDraft(DRAFT_KEY, collectFormData()));
-form.addEventListener("click", () => saveDraft(DRAFT_KEY, collectFormData()));
 
 // data.yaml の読み込み
 document.getElementById("btn-import").addEventListener("click", async () => {
@@ -102,7 +121,7 @@ document.getElementById("btn-import").addEventListener("click", async () => {
   }
 });
 
-// data.yaml の書き出し（クライアント側で簡易YAML化はせず、サーバに変換してもらう）
+// data.yaml の書き出し
 document.getElementById("btn-export-yaml").addEventListener("click", async () => {
   const statusEl = document.getElementById("import-status");
   try {
@@ -125,6 +144,8 @@ document.getElementById("btn-clear").addEventListener("click", () => {
   form.reset();
   document.querySelectorAll("[id$='-rows']").forEach((el) => (el.innerHTML = ""));
   ensureAtLeastOneRowEach();
+  photoPreview.hidden = true;
+  photoPlaceholder.hidden = false;
   localStorage.removeItem(DRAFT_KEY);
 });
 
@@ -132,7 +153,6 @@ document.getElementById("btn-clear").addEventListener("click", () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const statusEl = document.getElementById("generate-status");
-  const photoInput = document.getElementById("photo-file");
   const format = form.elements["format"].value;
   const payload = collectFormData();
 
@@ -146,7 +166,8 @@ form.addEventListener("submit", async (event) => {
   flashStatus(statusEl, "生成中...", 0);
   try {
     const response = await fetch("/generate/rirekisho-form", { method: "POST", body });
-    await downloadResponse(response, `rirekisho.${format === "pdf" ? "pdf" : format === "excel" ? "xlsx" : "docx"}`);
+    const ext = format === "pdf" ? "pdf" : format === "excel" ? "xlsx" : "docx";
+    await downloadResponse(response, `rirekisho.${ext}`);
     flashStatus(statusEl, "生成しました");
   } catch (err) {
     flashStatus(statusEl, err.message, 6000);

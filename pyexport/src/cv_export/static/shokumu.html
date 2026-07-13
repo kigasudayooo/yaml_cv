@@ -60,7 +60,13 @@
 
 <section class="output-section">
   <h2>出力</h2>
-  <button type="submit" class="primary">職務経歴書を生成してダウンロード（Word）</button>
+  <label>出力形式
+    <select name="format">
+      <option value="word">Word (.docx)</option>
+      <option value="pdf">PDF</option>
+    </select>
+  </label>
+  <button type="submit" class="primary">職務経歴書を生成してダウンロード</button>
   <span class="status" id="generate-status"></span>
 </section>
 </form>

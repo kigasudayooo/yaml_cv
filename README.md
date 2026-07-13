@@ -347,7 +347,7 @@ string,110mm,245mm,$date,font_size=9
 ```sh
 cd pyexport
 uv sync
-uv run cv-export shokumu-word -i /path/to/cv.md -o shokumu.docx
+uv run cv-export shokumu-word -i ../ignore/cv.md -o shokumu.docx
 uv run cv-export rirekisho-excel -i ../data.yaml -o rirekisho.xlsx
 uv run cv-export rirekisho-word -i ../data.yaml -o rirekisho.docx
 ```

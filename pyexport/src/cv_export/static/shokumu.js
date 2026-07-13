@@ -288,15 +288,18 @@ document.getElementById("btn-clear").addEventListener("click", () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const statusEl = document.getElementById("generate-status");
+  const format = form.elements["format"].value;
   const payload = collectFormData();
   const body = new FormData();
   body.append("payload", JSON.stringify(payload));
   body.append("name", payload.name || "");
+  body.append("format", format);
 
   flashStatus(statusEl, "生成中...", 0);
   try {
     const response = await fetch("/generate/shokumu-form", { method: "POST", body });
-    await downloadResponse(response, "shokumu.docx");
+    const ext = format === "pdf" ? "pdf" : "docx";
+    await downloadResponse(response, `shokumu.${ext}`);
     flashStatus(statusEl, "生成しました");
   } catch (err) {
     flashStatus(statusEl, err.message, 6000);

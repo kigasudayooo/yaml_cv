@@ -7,6 +7,7 @@ from pathlib import Path
 
 from cv_export.rirekisho_excel import generate_rirekisho_excel
 from cv_export.rirekisho_word import generate_rirekisho_word
+from cv_export.shokumu_pdf import generate_shokumu_pdf
 from cv_export.shokumu_word import generate_shokumu_word
 
 
@@ -25,6 +26,11 @@ def build_parser() -> argparse.ArgumentParser:
     shokumu.add_argument("-i", "--input", required=True, type=Path, help="cv.md へのパス")
     shokumu.add_argument("-o", "--output", required=True, type=Path, help="出力する .docx パス")
     shokumu.add_argument("-n", "--name", default="", help="氏名（任意）")
+
+    shokumu_pdf = sub.add_parser("shokumu-pdf", help="cv.md から職務経歴書 .pdf を生成")
+    shokumu_pdf.add_argument("-i", "--input", required=True, type=Path, help="cv.md へのパス")
+    shokumu_pdf.add_argument("-o", "--output", required=True, type=Path, help="出力する .pdf パス")
+    shokumu_pdf.add_argument("-n", "--name", default="", help="氏名（任意）")
 
     rirekisho_excel = sub.add_parser("rirekisho-excel", help="data.yaml から履歴書 .xlsx を生成")
     rirekisho_excel.add_argument(
@@ -52,6 +58,8 @@ def main() -> None:
 
     if args.command == "shokumu-word":
         generate_shokumu_word(args.input, args.output, name=args.name)
+    elif args.command == "shokumu-pdf":
+        generate_shokumu_pdf(args.input, args.output, name=args.name)
     elif args.command == "rirekisho-excel":
         generate_rirekisho_excel(args.input, args.output)
     elif args.command == "rirekisho-word":

@@ -31,6 +31,7 @@ from cv_export.serializers import (
     shokumu_json_to_markdown,
     shokumu_markdown_to_json,
 )
+from cv_export.shokumu_pdf import write_shokumu_pdf
 from cv_export.shokumu_word import build_shokumu_document
 
 logger = logging.getLogger("cv_export.web")
@@ -167,7 +168,13 @@ INDEX_HTML = """<!doctype html>
     <label>氏名（任意）
       <input type="text" name="name">
     </label>
-    <button type="submit">生成してダウンロード（Word）</button>
+    <label>出力形式
+      <select name="format">
+        <option value="word">Word (.docx)</option>
+        <option value="pdf">PDF</option>
+      </select>
+    </label>
+    <button type="submit">生成してダウンロード</button>
   </form>
 </section>
 
@@ -271,32 +278,44 @@ async def generate_rirekisho(
 
 @app.post("/generate/shokumu")
 async def generate_shokumu(
-    _auth: AuthDep, file: UploadFile, name: Annotated[str, Form()] = ""
+    _auth: AuthDep,
+    file: UploadFile,
+    name: Annotated[str, Form()] = "",
+    format: Annotated[str, Form()] = "word",
 ) -> Response:
-    """アップロードされた cv.md から職務経歴書 Word を生成する。
+    """アップロードされた cv.md から職務経歴書を生成する。
 
     Args:
         file: cv.md 相当の Markdown ファイル。
         name: 氏名（任意）。
+        format: pdf / word のいずれか。
 
     Returns:
-        生成した .docx ファイルを添付した Response。
+        生成したファイルを添付した Response。
     """
+    if format not in ("pdf", "word"):
+        raise HTTPException(status_code=400, detail="format must be one of pdf/word")
+
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         md_path = tmp_path / "cv.md"
         md_path.write_bytes(await file.read())
 
         cv = parse_cv_markdown(md_path)
-        document = build_shokumu_document(cv, name=name)
-        output = tmp_path / "shokumu.docx"
-        document.save(str(output))
+        if format == "pdf":
+            output = tmp_path / "shokumu.pdf"
+            write_shokumu_pdf(cv, output, name=name)
+            media_type = PDF_MEDIA_TYPE
+        else:
+            output = tmp_path / "shokumu.docx"
+            build_shokumu_document(cv, name=name).save(str(output))
+            media_type = DOCX_MEDIA_TYPE
         body = output.read_bytes()
 
     return Response(
         content=body,
-        media_type=DOCX_MEDIA_TYPE,
-        headers={"Content-Disposition": 'attachment; filename="shokumu.docx"'},
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{output.name}"'},
     )
 
 
@@ -334,7 +353,7 @@ async def generate_rirekisho_form(
         if photo is not None and photo.filename:
             photo_path = tmp_path / f"photo{Path(photo.filename).suffix or '.jpg'}"
             photo_path.write_bytes(await photo.read())
-            data["photo"] = photo_path.name
+            data["photo"] = str(photo_path)
 
         data_yaml = tmp_path / "data.yaml"
         data_yaml.write_text(rirekisho_json_to_yaml(data), encoding="utf-8")
@@ -366,16 +385,21 @@ async def generate_shokumu_form(
     _auth: AuthDep,
     payload: Annotated[str, Form()],
     name: Annotated[str, Form()] = "",
+    format: Annotated[str, Form()] = "word",
 ) -> Response:
-    """フォーム入力(JSON)から職務経歴書 Word を生成する。
+    """フォーム入力(JSON)から職務経歴書を生成する。
 
     Args:
         payload: shokumu.html が送信するフォーム内容の JSON 文字列。
         name: 氏名（任意）。
+        format: pdf / word のいずれか。
 
     Returns:
-        生成した .docx ファイルを添付した Response。
+        生成したファイルを添付した Response。
     """
+    if format not in ("pdf", "word"):
+        raise HTTPException(status_code=400, detail="format must be one of pdf/word")
+
     data = _parse_json_form_field(payload, "payload")
     markdown_text = shokumu_json_to_markdown(data)
 
@@ -385,15 +409,21 @@ async def generate_shokumu_form(
         md_path.write_text(markdown_text, encoding="utf-8")
 
         cv = parse_cv_markdown(md_path)
-        document = build_shokumu_document(cv, name=name or data.get("name", ""))
-        output = tmp_path / "shokumu.docx"
-        document.save(str(output))
+        resolved_name = name or data.get("name", "")
+        if format == "pdf":
+            output = tmp_path / "shokumu.pdf"
+            write_shokumu_pdf(cv, output, name=resolved_name)
+            media_type = PDF_MEDIA_TYPE
+        else:
+            output = tmp_path / "shokumu.docx"
+            build_shokumu_document(cv, name=resolved_name).save(str(output))
+            media_type = DOCX_MEDIA_TYPE
         body = output.read_bytes()
 
     return Response(
         content=body,
-        media_type=DOCX_MEDIA_TYPE,
-        headers={"Content-Disposition": 'attachment; filename="shokumu.docx"'},
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{output.name}"'},
     )
 
 
